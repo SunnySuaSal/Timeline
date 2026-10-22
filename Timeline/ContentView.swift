@@ -23,10 +23,14 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             List(timelines) { timeline in
-                Label(
-                    timeline.name,
-                    systemImage: "calendar"
-                )
+                NavigationLink {
+                    TimelineDetailView(timeline: timeline)
+                } label: {
+                    Label(
+                        timeline.name,
+                        systemImage: "calendar"
+                    )
+                }
             }
             .navigationTitle("Timelines")
             .overlay {
