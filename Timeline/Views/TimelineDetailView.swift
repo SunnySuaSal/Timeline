@@ -8,13 +8,14 @@
 
 
 
+
 import SwiftUI
 
 struct TimelineDetailView: View {
 
     let timeline: Timeline
 
-    // MARK: - Persistent View State
+    // MARK: - Timeline State
 
     @State private var scale = TimelineScale(
         centerDate: Calendar(
@@ -29,7 +30,7 @@ struct TimelineDetailView: View {
         pointsPerYear: 12
     )
 
-    // MARK: - Temporary Gesture State
+    // MARK: - Touch Gesture State
 
     @GestureState private var dragTranslation: CGFloat = 0
     @GestureState private var magnification: CGFloat = 1
@@ -54,6 +55,26 @@ struct TimelineDetailView: View {
             Text("\(timeline.events.count) events")
                 .foregroundStyle(.secondary)
 
+            #if os(macOS)
+
+            TimelineAxisView(scale: scale)
+                .overlay {
+                    TrackpadInputView(
+                        onScroll: { delta in
+                            scale = scale.panned(by: delta)
+                        },
+                        onMagnify: { factor in
+                            scale = scale.zoomed(by: factor)
+                        }
+                    )
+                }
+
+            Text("Use two fingers to scroll. Pinch to zoom.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            #else
+
             TimelineAxisView(scale: effectiveScale)
                 .contentShape(Rectangle())
                 .gesture(dragGesture)
@@ -62,6 +83,8 @@ struct TimelineDetailView: View {
             Text("Drag to navigate. Pinch to zoom.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+
+            #endif
         }
         .frame(
             maxWidth: .infinity,
@@ -71,7 +94,7 @@ struct TimelineDetailView: View {
         .navigationTitle(timeline.name)
     }
 
-    // MARK: - Drag Gesture
+    // MARK: - Drag Gesture (iOS / iPadOS)
 
     private var dragGesture: some Gesture {
         DragGesture(minimumDistance: 2)
@@ -87,7 +110,7 @@ struct TimelineDetailView: View {
             }
     }
 
-    // MARK: - Magnification Gesture
+    // MARK: - Magnification Gesture (iOS / iPadOS)
 
     private var magnifyGesture: some Gesture {
         MagnifyGesture()
