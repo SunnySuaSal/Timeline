@@ -6,65 +6,108 @@
 //
 
 
+
 import SwiftUI
 
 struct TimelineAxisView: View {
 
     let scale: TimelineScale
 
-    private let years = Array(
-        stride(from: 1900, through: 2100, by: 10)
-    )
+    private var calendar: Calendar {
+        var result = Calendar(identifier: .gregorian)
+        result.timeZone = TimeZone(secondsFromGMT: 0)!
+        return result
+    }
 
     var body: some View {
         GeometryReader { geometry in
+
+            let width = geometry.size.width
+            let height = geometry.size.height
+
             ZStack(alignment: .topLeading) {
 
                 // Main horizontal axis
                 Rectangle()
                     .fill(.secondary)
-                    .frame(
-                        width: geometry.size.width,
-                        height: 6
-                    )
+                    .frame(width: width, height: 6)
                     .position(
-                        x: geometry.size.width / 2,
-                        y: geometry.size.height / 2
+                        x: width / 2,
+                        y: height / 2
                     )
 
-                // Year markers
-                ForEach(years, id: \.self) { year in
+                // Visible decade markers
+                ForEach(
+                    visibleYears(width: width),
+                    id: \.self
+                ) { year in
 
                     let x = scale.xPosition(
                         for: date(for: year),
-                        viewportWidth: geometry.size.width
+                        viewportWidth: width
                     )
 
-                    if x >= 0 && x <= geometry.size.width {
+                    VStack(spacing: 8) {
+                        Rectangle()
+                            .fill(.primary)
+                            .frame(width: 2, height: 20)
 
-                        VStack(spacing: 8) {
-                            Rectangle()
-                                .fill(.primary)
-                                .frame(width: 2, height: 20)
-
-                            Text(String(year))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .position(
-                            x: x,
-                            y: geometry.size.height / 2 + 24
-                        )
+                        Text(String(year))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
+                    .position(
+                        x: x,
+                        y: height / 2 + 24
+                    )
                 }
             }
+            .frame(width: width, height: height)
+            .clipped()
         }
         .frame(height: 180)
     }
 
+    // MARK: - Visible Years
+
+    private func visibleYears(width: CGFloat) -> [Int] {
+
+        guard width > 0 else { return [] }
+
+        let leftDate = scale.date(
+            at: 0,
+            viewportWidth: width
+        )
+
+        let rightDate = scale.date(
+            at: width,
+            viewportWidth: width
+        )
+
+        let leftYear = calendar.component(
+            .year,
+            from: leftDate
+        )
+
+        let rightYear = calendar.component(
+            .year,
+            from: rightDate
+        )
+
+        let firstDecade = (leftYear / 10) * 10
+
+        return Array(
+            stride(
+                from: firstDecade,
+                through: rightYear + 10,
+                by: 10
+            )
+        )
+    }
+
+    // MARK: - Date Creation
+
     private func date(for year: Int) -> Date {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
 
         let components = DateComponents(
             year: year,

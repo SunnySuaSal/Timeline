@@ -7,29 +7,42 @@
 
 
 
+
 import SwiftUI
 
 struct TimelineDetailView: View {
 
     let timeline: Timeline
 
-    private var scale: TimelineScale {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+    // MARK: - Persistent View State
 
-        let centerDate = calendar.date(
+    @State private var scale = TimelineScale(
+        centerDate: Calendar(
+            identifier: .gregorian
+        ).date(
             from: DateComponents(
                 year: 1980,
                 month: 1,
                 day: 1
             )
-        )!
+        )!,
+        pointsPerYear: 12
+    )
 
-        return TimelineScale(
-            centerDate: centerDate,
-            pointsPerYear: 9
-        )
+    // MARK: - Temporary Gesture State
+
+    @GestureState private var dragTranslation: CGFloat = 0
+    @GestureState private var magnification: CGFloat = 1
+
+    // MARK: - Effective Scale
+
+    private var effectiveScale: TimelineScale {
+        scale
+            .panned(by: dragTranslation)
+            .zoomed(by: magnification)
     }
+
+    // MARK: - Body
 
     var body: some View {
         VStack(spacing: 24) {
@@ -41,7 +54,14 @@ struct TimelineDetailView: View {
             Text("\(timeline.events.count) events")
                 .foregroundStyle(.secondary)
 
-            TimelineAxisView(scale: scale)
+            TimelineAxisView(scale: effectiveScale)
+                .contentShape(Rectangle())
+                .gesture(dragGesture)
+                .simultaneousGesture(magnifyGesture)
+
+            Text("Drag to navigate. Pinch to zoom.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
         .frame(
             maxWidth: .infinity,
@@ -49,5 +69,37 @@ struct TimelineDetailView: View {
         )
         .padding()
         .navigationTitle(timeline.name)
+    }
+
+    // MARK: - Drag Gesture
+
+    private var dragGesture: some Gesture {
+        DragGesture(minimumDistance: 2)
+            .updating($dragTranslation) {
+                value, state, _ in
+
+                state = value.translation.width
+            }
+            .onEnded { value in
+                scale = scale.panned(
+                    by: value.translation.width
+                )
+            }
+    }
+
+    // MARK: - Magnification Gesture
+
+    private var magnifyGesture: some Gesture {
+        MagnifyGesture()
+            .updating($magnification) {
+                value, state, _ in
+
+                state = value.magnification
+            }
+            .onEnded { value in
+                scale = scale.zoomed(
+                    by: value.magnification
+                )
+            }
     }
 }

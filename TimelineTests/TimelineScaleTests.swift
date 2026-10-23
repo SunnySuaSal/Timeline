@@ -107,5 +107,73 @@ struct TimelineScaleTests {
 
         #expect(second > first)
     }
+    
+    
+    @Test
+    func panningRightMovesCenterToPast() {
+
+        let original = TimelineScale(
+            centerDate: .now,
+            pointsPerYear: 12
+        )
+
+        let moved = original.panned(by: 100)
+
+        #expect(moved.centerDate < original.centerDate)
+    }
+
+    @Test
+    func zoomInIncreasesScale() {
+
+        let original = TimelineScale(
+            centerDate: .now,
+            pointsPerYear: 12
+        )
+
+        let zoomed = original.zoomed(by: 2)
+
+        #expect(zoomed.pointsPerYear == 24)
+    }
+
+    @Test
+    func zoomRespectsMaximumLimit() {
+
+        let original = TimelineScale(
+            centerDate: .now,
+            pointsPerYear: 180
+        )
+
+        let zoomed = original.zoomed(by: 10)
+
+        #expect(
+            zoomed.pointsPerYear == TimelineScale.maximumZoom
+        )
+    }
+
+    @Test
+    func panningMovesAnEventByRequestedDistance() {
+
+        let center = Date.now
+
+        let original = TimelineScale(
+            centerDate: center,
+            pointsPerYear: 12
+        )
+
+        let moved = original.panned(by: 100)
+
+        let oldX = original.xPosition(
+            for: center,
+            viewportWidth: 800
+        )
+
+        let newX = moved.xPosition(
+            for: center,
+            viewportWidth: 800
+        )
+
+        #expect(abs((newX - oldX) - 100) < 0.001)
+    }
+
 }
 
