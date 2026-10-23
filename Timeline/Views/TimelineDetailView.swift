@@ -6,36 +6,47 @@
 //
 
 
+
 import SwiftUI
-import SwiftData
 
 struct TimelineDetailView: View {
 
     let timeline: Timeline
 
-    var body: some View {
-        VStack(spacing: 20) {
+    private var scale: TimelineScale {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
 
-            Image(systemName: "calendar")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
+        let centerDate = calendar.date(
+            from: DateComponents(
+                year: 1980,
+                month: 1,
+                day: 1
+            )
+        )!
+
+        return TimelineScale(
+            centerDate: centerDate,
+            pointsPerYear: 9
+        )
+    }
+
+    var body: some View {
+        VStack(spacing: 24) {
 
             Text(timeline.name)
                 .font(.largeTitle)
                 .bold()
-            
+
             Text("\(timeline.events.count) events")
-                .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            Text("No events yet")
-                .font(.headline)
-
-            Text("Events will appear here.")
-                .foregroundStyle(.secondary)
-
+            TimelineAxisView(scale: scale)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(
+            maxWidth: .infinity,
+            maxHeight: .infinity
+        )
         .padding()
         .navigationTitle(timeline.name)
     }
