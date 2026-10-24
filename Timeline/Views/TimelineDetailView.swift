@@ -89,7 +89,14 @@ struct TimelineDetailView: View {
             }
         }
         .sheet(item: $selectedEvent) { event in
-            EventDetailView(event: event)
+
+            EventDetailView(
+                timeline: timeline,
+                event: event
+            ) { date in
+
+                scale.centerDate = date
+            }
         }
     }
 
