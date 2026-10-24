@@ -9,13 +9,14 @@
 
 
 
+
 import SwiftUI
 
 struct TimelineDetailView: View {
 
     let timeline: Timeline
 
-    // MARK: - Timeline State
+    // MARK: - View State
 
     @State private var scale = TimelineScale(
         centerDate: Calendar(
@@ -30,12 +31,20 @@ struct TimelineDetailView: View {
         pointsPerYear: 12
     )
 
-    // MARK: - Touch Gesture State
+    @State private var showingEventEditor = false
+
+    // MARK: - Gesture State
 
     @GestureState private var dragTranslation: CGFloat = 0
     @GestureState private var magnification: CGFloat = 1
 
-    // MARK: - Effective Scale
+    // MARK: - Computed Properties
+
+    private var sortedEvents: [TimelineEvent] {
+        timeline.events.sorted {
+            $0.date < $1.date
+        }
+    }
 
     private var effectiveScale: TimelineScale {
         scale
@@ -55,6 +64,36 @@ struct TimelineDetailView: View {
             Text("\(timeline.events.count) events")
                 .foregroundStyle(.secondary)
 
+            timelineContent
+        }
+        .frame(
+            maxWidth: .infinity,
+            maxHeight: .infinity
+        )
+        .padding()
+        .navigationTitle(timeline.name)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showingEventEditor = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .help("Add Event")
+            }
+        }
+        .sheet(isPresented: $showingEventEditor) {
+            EventEditorView(timeline: timeline) { date in
+                scale.centerDate = date
+            }
+        }
+    }
+
+    // MARK: - Timeline Content
+
+    private var timelineContent: some View {
+        ZStack {
+
             #if os(macOS)
 
             TimelineAxisView(scale: scale)
@@ -69,9 +108,10 @@ struct TimelineDetailView: View {
                     )
                 }
 
-            Text("Use two fingers to scroll. Pinch to zoom.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            TimelineEventMarkersView(
+                events: sortedEvents,
+                scale: scale
+            )
 
             #else
 
@@ -80,21 +120,17 @@ struct TimelineDetailView: View {
                 .gesture(dragGesture)
                 .simultaneousGesture(magnifyGesture)
 
-            Text("Drag to navigate. Pinch to zoom.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            TimelineEventMarkersView(
+                events: sortedEvents,
+                scale: effectiveScale
+            )
 
             #endif
         }
-        .frame(
-            maxWidth: .infinity,
-            maxHeight: .infinity
-        )
-        .padding()
-        .navigationTitle(timeline.name)
+        .frame(height: 180)
     }
 
-    // MARK: - Drag Gesture (iOS / iPadOS)
+    // MARK: - Drag Gesture
 
     private var dragGesture: some Gesture {
         DragGesture(minimumDistance: 2)
@@ -110,7 +146,7 @@ struct TimelineDetailView: View {
             }
     }
 
-    // MARK: - Magnification Gesture (iOS / iPadOS)
+    // MARK: - Magnification Gesture
 
     private var magnifyGesture: some Gesture {
         MagnifyGesture()
