@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct EventDetailView: View {
 
@@ -17,12 +18,17 @@ struct EventDetailView: View {
 
     // MARK: - Environment
 
+    @Environment(\.modelContext)
+    private var modelContext
+
     @Environment(\.dismiss)
     private var dismiss
 
     // MARK: - View State
 
     @State private var showingEditor = false
+    @State private var showingDeleteConfirmation = false
+    @State private var deleteError: String?
 
     // MARK: - Body
 
@@ -98,6 +104,17 @@ struct EventDetailView: View {
                     }
                     .help("Edit Event")
 
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+
+                        Label(
+                            "Delete",
+                            systemImage: "trash"
+                        )
+                    }
+                    .help("Delete Event")
+
                     Spacer()
 
                     Button("Done") {
@@ -123,6 +140,70 @@ struct EventDetailView: View {
                 event: event,
                 onSaved: onSaved
             )
+        }
+
+        // MARK: - Delete Confirmation
+
+        .alert(
+            "Delete Event?",
+            isPresented: $showingDeleteConfirmation
+        ) {
+
+            Button("Cancel", role: .cancel) {
+                // No changes are made.
+            }
+
+            Button("Delete", role: .destructive) {
+                deleteEvent()
+            }
+
+        } message: {
+
+            Text(
+                "Are you sure you want to delete " +
+                "\"\(event.title)\"? " +
+                "This action cannot be undone."
+            )
+        }
+
+        // MARK: - Error Alert
+
+        .alert(
+            "Could Not Delete",
+            isPresented: Binding(
+                get: { deleteError != nil },
+                set: {
+                    if !$0 {
+                        deleteError = nil
+                    }
+                }
+            )
+        ) {
+
+            Button("OK", role: .cancel) {
+                deleteError = nil
+            }
+
+        } message: {
+
+            Text(deleteError ?? "")
+        }
+    }
+
+    // MARK: - Persistence
+
+    private func deleteEvent() {
+
+        modelContext.delete(event)
+
+        do {
+            try modelContext.save()
+
+            dismiss()
+
+        } catch {
+            modelContext.rollback()
+            deleteError = error.localizedDescription
         }
     }
 }

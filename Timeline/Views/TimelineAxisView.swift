@@ -65,7 +65,6 @@ struct TimelineAxisView: View {
             .frame(width: width, height: height)
             .clipped()
         }
-        .frame(height: 180)
     }
 
     // MARK: - Visible Years

@@ -144,7 +144,7 @@ struct TimelineDetailView: View {
 
             #endif
         }
-        .frame(height: 180)
+        .frame(height: 350)
     }
 
     // MARK: - Drag Gesture
