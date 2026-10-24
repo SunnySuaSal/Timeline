@@ -73,10 +73,14 @@ struct EventDetailView: View {
                            !notes.isEmpty {
 
                             Text(notes)
+                                .font(.title3)
+                                .lineSpacing(5)
+                                .textSelection(.enabled)
                                 .frame(
                                     maxWidth: .infinity,
                                     alignment: .leading
                                 )
+                                .padding(.vertical, 6)
 
                         } else {
 

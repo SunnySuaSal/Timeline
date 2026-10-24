@@ -18,7 +18,7 @@ struct TimelineEventMarkersView: View {
 
     // MARK: - Layout Configuration
 
-    private let labelWidth: CGFloat = 132
+    private let labelWidth: CGFloat = 160
     private let labelGap: CGFloat = 12
 
     private let baseDistance: CGFloat = 82
@@ -128,8 +128,8 @@ struct TimelineEventMarkersView: View {
                             VStack(spacing: 3) {
 
                                 Text(event.title)
-                                    .font(.caption)
-                                    .fontWeight(.medium)
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
                                     .lineLimit(1)
 
                                 Text(

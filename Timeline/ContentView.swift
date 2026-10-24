@@ -39,10 +39,27 @@ struct ContentView: View {
 
                 } label: {
 
-                    Label(
-                        timeline.name,
-                        systemImage: "calendar"
-                    )
+                    HStack(spacing: 14) {
+
+                        Image(systemName: "calendar")
+                            .font(.title2)
+                            .foregroundStyle(.tint)
+                            .frame(width: 34)
+
+                        VStack(alignment: .leading, spacing: 5) {
+
+                            Text(timeline.name)
+                                .font(.title3)
+                                .fontWeight(.semibold)
+
+                            Text("\(timeline.events.count) events")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
                 }
 
                 // MARK: - Context Menu
