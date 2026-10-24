@@ -32,6 +32,7 @@ struct TimelineDetailView: View {
     )
 
     @State private var showingEventEditor = false
+    @State private var selectedEvent: TimelineEvent?
 
     // MARK: - Gesture State
 
@@ -87,6 +88,9 @@ struct TimelineDetailView: View {
                 scale.centerDate = date
             }
         }
+        .sheet(item: $selectedEvent) { event in
+            EventDetailView(event: event)
+        }
     }
 
     // MARK: - Timeline Content
@@ -110,7 +114,10 @@ struct TimelineDetailView: View {
 
             TimelineEventMarkersView(
                 events: sortedEvents,
-                scale: scale
+                scale: scale,
+                onSelect: { event in
+                    selectedEvent = event
+                }
             )
 
             #else
@@ -122,7 +129,10 @@ struct TimelineDetailView: View {
 
             TimelineEventMarkersView(
                 events: sortedEvents,
-                scale: effectiveScale
+                scale: effectiveScale,
+                onSelect: { event in
+                    selectedEvent = event
+                }
             )
 
             #endif

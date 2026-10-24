@@ -12,6 +12,7 @@ struct TimelineEventMarkersView: View {
 
     let events: [TimelineEvent]
     let scale: TimelineScale
+    let onSelect: (TimelineEvent) -> Void
 
     var body: some View {
         GeometryReader { geometry in
@@ -60,30 +61,37 @@ struct TimelineEventMarkersView: View {
                             .frame(width: 11, height: 11)
                             .position(x: x, y: middleY)
 
-                        VStack(spacing: 3) {
-                            Text(event.title)
-                                .font(.caption)
-                                .fontWeight(.medium)
-                                .lineLimit(1)
+                        Button {
+                            onSelect(event)
+                        } label: {
 
-                            Text(
-                                event.date,
-                                format: .dateTime.year()
-                            )
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            VStack(spacing: 3) {
+
+                                Text(event.title)
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .lineLimit(1)
+
+                                Text(
+                                    event.date,
+                                    format: .dateTime.year()
+                                )
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            }
+                            .frame(width: 125)
+                            .contentShape(Rectangle())
                         }
-                        .frame(width: 125)
+                        .buttonStyle(.plain)
                         .position(
                             x: x,
-                            y: middleY
-                                + (isAbove ? -48 : 48)
+                            y: middleY + (isAbove ? -48 : 48)
                         )
                     }
                 }
             }
             .frame(width: width, height: geometry.size.height)
         }
-        .allowsHitTesting(false)
+        //.allowsHitTesting(false)
     }
 }
