@@ -49,19 +49,14 @@ struct EventDetailView: View {
                             value: event.title
                         )
 
-                        LabeledContent {
+                        LabeledContent("Date") {
 
                             Text(
-                                event.date,
-                                format: .dateTime
-                                    .day()
-                                    .month(.wide)
-                                    .year()
+                                EventDatePresentation.string(
+                                    for: event.date,
+                                    precision: event.datePrecision
+                                )
                             )
-
-                        } label: {
-
-                            Text("Date")
                         }
                     }
 

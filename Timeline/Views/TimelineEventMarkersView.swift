@@ -133,8 +133,10 @@ struct TimelineEventMarkersView: View {
                                     .lineLimit(1)
 
                                 Text(
-                                    event.date,
-                                    format: .dateTime.year()
+                                    EventDatePresentation.string(
+                                        for: event.date,
+                                        precision: event.datePrecision
+                                    )
                                 )
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
