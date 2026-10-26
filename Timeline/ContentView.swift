@@ -208,7 +208,6 @@ struct ContentView: View {
                         "Name",
                         text: $newTimelineName
                     )
-                    .textFieldStyle(.roundedBorder)
 
                 } header: {
 
